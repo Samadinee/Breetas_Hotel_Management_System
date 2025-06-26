@@ -7,11 +7,13 @@ const {
   getMyBookings,
   cancelBooking,
   getAllBookings,
+  updateBookingStatus,
 } = require("../controllers/bookingController");
 
 router.post("/", protect, bookRoom);
 router.get("/my", protect, getMyBookings);
 router.delete("/:id", protect, cancelBooking);
 router.get("/", protect, adminOnly, getAllBookings);
+router.put("/:id/status", protect, adminOnly, updateBookingStatus);
 
 module.exports = router;

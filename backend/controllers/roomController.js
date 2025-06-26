@@ -7,7 +7,11 @@ exports.addRoom = async (req, res) => {
     if (req.file) {
       roomData.image = `/uploads/${req.file.filename}`;
     }
+    
+    // Initialize with empty availability
+    roomData.availability = [];
     const room = await Room.create(roomData);
+    
     res.status(201).json(room);
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -42,6 +46,30 @@ exports.getRoomById = async (req, res) => {
     const room = await Room.findById(req.params.id);
     if (!room) return res.status(404).json({ message: "Room not found" });
     res.json(room);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+exports.getRoomAvailability = async (req, res) => {
+  try {
+    const { date } = req.query;
+    const room = await Room.findById(req.params.id);
+    
+    if (!room) {
+      return res.status(404).json({ message: "Room not found" });
+    }
+
+    const dateObj = new Date(date);
+    const availabilityRecord = room.availability.find(a => 
+      a.date.toISOString().split('T')[0] === dateObj.toISOString().split('T')[0]
+    );
+
+    const availableRooms = availabilityRecord ? 
+      availabilityRecord.availableRooms : 
+      room.totalRooms;
+
+    res.json(availableRooms);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }

@@ -1,4 +1,4 @@
-// /src/api.js
+// frontend/src/api.js
 export const API_URL = 'http://localhost:5000/api';
 
 export const registerUser = async (userData) => {
@@ -124,5 +124,10 @@ export const deleteRoom = async (roomId, token) => {
       'Authorization': `Bearer ${token}`,
     },
   });
+  return await response.json();
+};
+
+export const getRoomAvailability = async (roomId, date) => {
+  const response = await fetch(`${API_URL}/rooms/${roomId}/availability?date=${date}`);
   return await response.json();
 };

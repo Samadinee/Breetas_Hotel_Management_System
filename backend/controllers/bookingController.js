@@ -1,4 +1,4 @@
-// /controllers/bookingController.js
+// backend/controllers/bookingController.js
 const Booking = require("../models/Booking");
 const Room = require("../models/Room");
 
@@ -8,53 +8,49 @@ exports.bookRoom = async (req, res) => {
 
   try {
     const room = await Room.findById(roomId);
-    if (!room || room.availableRooms < 1) {
-      return res.status(400).json({ message: "No available rooms" });
+    if (!room) {
+      return res.status(404).json({ message: "Room not found" });
     }
 
     // Convert dates to Date objects
     const checkIn = new Date(checkInDate);
     const checkOut = new Date(checkOutDate);
+    
     if (checkIn >= checkOut) {
       return res.status(400).json({ message: "Check-out date must be after check-in date" });
     }
 
-    // Find all bookings for this room that overlap with the requested date range
-    const overlappingBookings = await Booking.find({
-      roomId,
-      $or: [
-        { checkInDate: { $lt: checkOut }, checkOutDate: { $gt: checkIn } }
-      ]
-    });
+    // Check availability for each date in the range
+    const dateAvailability = {};
+    const datesToCheck = [];
+    
+    // Generate all dates in the range
+    for (let d = new Date(checkIn); d < checkOut; d.setDate(d.getDate() + 1)) {
+      const dateStr = d.toISOString().split('T')[0];
+      datesToCheck.push(new Date(d));
+      
+      // Find availability record for this date
+      const availability = room.availability.find(a => 
+        a.date.toISOString().split('T')[0] === dateStr
+      );
+      
+      // If no record exists, assume all rooms are available
+      dateAvailability[dateStr] = availability ? availability.availableRooms : room.totalRooms;
+    }
 
-    // For each date in the requested range, check if the total booked persons exceeds availableRooms
-    let canBook = true;
-    let errorDate = null;
-    for (
-      let d = new Date(checkIn);
-      d < checkOut;
-      d.setDate(d.getDate() + 1)
-    ) {
-      let personsBooked = 0;
-      overlappingBookings.forEach(b => {
-        // If this booking covers this date
-        if (d >= b.checkInDate && d < b.checkOutDate) {
-          personsBooked += b.numberOfPersons;
-        }
-      });
-      if (personsBooked + Number(numberOfPersons) > room.availableRooms) {
-        canBook = false;
-        errorDate = new Date(d);
-        break;
+    // Check if room is available for all dates
+    for (const dateStr in dateAvailability) {
+      if (dateAvailability[dateStr] < 1) {
+        return res.status(400).json({ 
+          message: `Room is not available on ${dateStr}` 
+        });
       }
     }
 
-    if (!canBook) {
-      return res.status(400).json({ message: `Room is fully booked for at least one day in your selected range (${errorDate.toISOString().slice(0,10)})` });
-    }
+    // Calculate total price
+    const totalPrice = numberOfPersons * room.price * datesToCheck.length;
 
-    const totalPrice = numberOfPersons * room.price;
-
+    // Create booking
     const booking = await Booking.create({
       userId,
       roomId,
@@ -65,8 +61,24 @@ exports.bookRoom = async (req, res) => {
       totalPrice
     });
 
-    // Optionally, you may want to update availableRooms only if you want to track per-day availability
-    // await room.save();
+    // Update availability for each date
+    for (const date of datesToCheck) {
+      const dateStr = date.toISOString().split('T')[0];
+      const availabilityIndex = room.availability.findIndex(a => 
+        a.date.toISOString().split('T')[0] === dateStr
+      );
+
+      if (availabilityIndex >= 0) {
+        room.availability[availabilityIndex].availableRooms -= 1;
+      } else {
+        room.availability.push({
+          date,
+          availableRooms: room.totalRooms - 1
+        });
+      }
+    }
+
+    await room.save();
 
     res.status(201).json(booking);
   } catch (err) {
@@ -74,21 +86,60 @@ exports.bookRoom = async (req, res) => {
   }
 };
 
+// Update other booking controller methods as needed...
+
 exports.getMyBookings = async (req, res) => {
   const bookings = await Booking.find({ userId: req.user._id }).populate("roomId");
   res.json(bookings);
 };
 
+// /controllers/bookingController.js
 exports.cancelBooking = async (req, res) => {
-  const booking = await Booking.findOne({ _id: req.params.id, userId: req.user._id });
-  if (!booking) return res.status(404).json({ message: "Booking not found" });
+  try {
+    const booking = await Booking.findOne({ 
+      _id: req.params.id, 
+      userId: req.user._id 
+    });
+    
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
 
-  const room = await Room.findById(booking.roomId);
-  room.availableRooms += 1;
-  await room.save();
+    const room = await Room.findById(booking.roomId);
+    if (!room) {
+      return res.status(404).json({ message: "Room not found" });
+    }
 
-  await booking.remove();
-  res.json({ message: "Booking cancelled" });
+    // Generate all dates in the booking range
+    const datesToRestore = [];
+    for (let d = new Date(booking.checkInDate); d < new Date(booking.checkOutDate); d.setDate(d.getDate() + 1)) {
+      datesToRestore.push(new Date(d));
+    }
+
+    // Restore availability for each date
+    for (const date of datesToRestore) {
+      const dateStr = date.toISOString().split('T')[0];
+      const availabilityIndex = room.availability.findIndex(a => 
+        a.date.toISOString().split('T')[0] === dateStr
+      );
+
+      if (availabilityIndex >= 0) {
+        room.availability[availabilityIndex].availableRooms += 1;
+        
+        // Remove availability record if it's back to total rooms
+        if (room.availability[availabilityIndex].availableRooms >= room.totalRooms) {
+          room.availability.splice(availabilityIndex, 1);
+        }
+      }
+    }
+
+    await room.save();
+    await booking.remove();
+
+    res.json({ message: "Booking cancelled" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
 exports.getAllBookings = async (req, res) => {

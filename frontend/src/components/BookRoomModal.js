@@ -1,3 +1,4 @@
+// frontend/src/components/BookRoomModal.js
 import React, { useState } from 'react';
 import { bookRoom } from '../api';
 import { isAuthenticated, getUser } from '../auth';

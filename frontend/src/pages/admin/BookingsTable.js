@@ -64,15 +64,30 @@ function BookingsTable({ bookings, handleStatusUpdate }) {
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <select
-                    value={booking.status}
-                    onChange={(e) => handleStatusUpdate(booking._id, e.target.value)}
-                    className="border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
-                  >
-                    <option value="Pending">Pending</option>
-                    <option value="Confirmed">Confirmed</option>
-                    <option value="Cancelled">Cancelled</option>
-                  </select>
+                  {booking.status === 'Pending' && (
+                    <select
+                      value={booking.status}
+                      onChange={(e) => handleStatusUpdate(booking._id, e.target.value)}
+                      className="border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                    >
+                      <option value="Pending">Pending</option>
+                      <option value="Confirmed">Confirmed</option>
+                      <option value="Cancelled">Cancelled</option>
+                    </select>
+                  )}
+                  {booking.status === 'Confirmed' && (
+                    <select
+                      value={booking.status}
+                      onChange={(e) => handleStatusUpdate(booking._id, e.target.value)}
+                      className="border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                    >
+                      <option value="Confirmed">Confirmed</option>
+                      <option value="Cancelled">Cancelled</option>
+                    </select>
+                  )}
+                  {booking.status === 'Cancelled' && (
+                    <span className="text-gray-400">No actions</span>
+                  )}
                 </td>
               </tr>
             ))}

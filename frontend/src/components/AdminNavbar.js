@@ -1,3 +1,4 @@
+// frontend/src/components/AdminNavbar.js
 import { Link } from 'react-router-dom';
 
 function AdminNavbar() {
