@@ -118,7 +118,7 @@ function BookRoom() {
           <div className="mb-6">
             <div className="flex justify-between mb-2">
               <span className="text-gray-600">Price per night:</span>
-              <span className="font-bold">${room.price}</span>
+              <span className="font-bold">Rs.{room.price}</span>
             </div>
             <div className="flex justify-between mb-2">
               <span className="text-gray-600">Capacity:</span>

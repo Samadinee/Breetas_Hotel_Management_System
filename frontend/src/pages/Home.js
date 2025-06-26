@@ -31,15 +31,15 @@ function Home() {
       
       {/* Hero Section with Background Image */}
       <div 
-        className="relative h-96 bg-cover bg-center flex items-center justify-center"
+        className="relative h-[41rem] bg-cover bg-center flex items-center justify-center"
         style={{ backgroundImage: `url(${backgroundImage})` }}
       >
         <div className="absolute inset-0 bg-black bg-opacity-40"></div>
         <div className="relative z-10 text-center px-4">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Welcome to Hotel Breefa's Garden</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Welcome to Hotel Breeta's Garden</h1>
           <p className="text-xl text-white mb-8">Luxury and comfort await you.</p>
           <a 
-            href="/bookings" 
+            href="/rooms" 
             className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300"
           >
             Book Your Stay
@@ -57,19 +57,7 @@ function Home() {
           )}
         </div>
       </div>
-
-      {/* Existing Content Below */}
-      <div className="bg-blue-50 py-12">
-        <div className="container mx-auto px-4">
-          {isAuthenticated() ? (
-            <div className="text-center">
-              <a href="/rooms" className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-300">
-                Browse All Rooms
-              </a>
-            </div>
-          ) : null}
-        </div>
-      </div>
+      
 
       <div className="container mx-auto px-4 py-12">
         <h2 className="text-3xl font-bold text-center mb-8">Featured Rooms</h2>

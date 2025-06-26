@@ -100,7 +100,7 @@ function MyReservations() {
                         {new Date(booking.checkInDate).toLocaleDateString()} - {new Date(booking.checkOutDate).toLocaleDateString()}
                       </p>
                       <p className="text-sm text-gray-500">
-                        {booking.numberOfPersons} persons • ${booking.totalPrice}
+                        {booking.numberOfPersons} persons • Rs.{booking.totalPrice}
                       </p>
                       <span className={`inline-block mt-2 px-2 py-1 text-xs font-semibold rounded-full ${
                         booking.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :

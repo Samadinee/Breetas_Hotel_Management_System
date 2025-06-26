@@ -55,7 +55,7 @@ function RoomCard({ room }) {  // Removed the arrow function syntax here
         </div>
         
         <div className="flex justify-between items-center mb-3">
-          <span className="text-blue-600 font-bold">${room.price}/night</span>
+          <span className="text-blue-600 font-bold">Rs.{room.price}/night</span>
           <span className="text-sm text-gray-500">Capacity: {room.capacity}</span>
         </div>
         

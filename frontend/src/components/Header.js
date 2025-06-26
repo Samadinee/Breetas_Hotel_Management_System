@@ -50,7 +50,7 @@ function Header() {
   return (
     <header className="bg-blue-600 text-white shadow-md">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
-        <Link to="/" className="text-2xl font-bold">Hotel Paradise</Link>
+        <Link to="/" className="text-2xl font-bold">Hotel Breeta's Garden</Link>
         <div className="flex items-center space-x-4">
           {isAuthenticated() ? (
             <div className="flex items-center space-x-4" ref={dropdownRef}>
